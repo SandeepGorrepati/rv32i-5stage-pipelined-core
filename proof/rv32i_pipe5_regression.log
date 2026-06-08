@@ -1,0 +1,147 @@
+===== Running RV32I PIPE5 regression =====
+
+=== ALU ===
+make run TEST=test_pipe_alu.hex EXPECT_X10=12
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_alu.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=12 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 12
+PASS: x10 = 12
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 4
+Stall count         = 0
+CPI                 = 10.000000
+Final PC            = 0x000000a0
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+=== BRANCH TAKEN ===
+make run TEST=test_pipe_branch.hex EXPECT_X10=12
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_branch.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=12 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 12
+PASS: x10 = 12
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 3
+Stall count         = 0
+CPI                 = 13.333333
+Final PC            = 0x0000009c
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+=== BRANCH NOT TAKEN ===
+make run TEST=test_pipe_branch_not_taken.hex EXPECT_X10=12
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_branch_not_taken.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=12 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 12
+PASS: x10 = 12
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 4
+Stall count         = 0
+CPI                 = 10.000000
+Final PC            = 0x000000a0
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+=== FORWARDING ===
+make run TEST=test_pipe_forward.hex EXPECT_X10=6
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_forward.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=6 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 6
+PASS: x10 = 6
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 3
+Stall count         = 0
+CPI                 = 13.333333
+Final PC            = 0x000000a0
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+=== LOAD-USE HAZARD ===
+make run TEST=test_pipe_load_use.hex EXPECT_X10=6
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_load_use.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=6 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 6
+PASS: x10 = 6
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 3
+Stall count         = 1
+CPI                 = 13.333333
+Final PC            = 0x0000009c
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+=== STORE FORWARD ===
+make run TEST=test_pipe_store_forward.hex EXPECT_X10=7
+make[1]: Entering directory '/home/sandeep/proj1_rv32i'
+rm -rf build/*
+mkdir -p build
+scripts/pad_hex.sh tb/programs/test_pipe_store_forward.hex build/padded.hex 64
+iverilog -g2012 -Wall -Wimplicit -Wportbind -Wselect-range \
+  -DEXPECT_X10=7 \
+  -s tb_core_pipe5 \
+  rtl/regfile.sv rtl/alu.sv rtl/hazard_detection_unit.sv rtl/forwarding_unit.sv rtl/core_pipe5.sv tb/tb_core_pipe5.sv \
+  -o build/core_pipe5.out
+vvp build/core_pipe5.out
+VCD info: dumpfile build/core_pipe5.vcd opened for output.
+=== SIM START ===
+EXPECTED x10 = 7
+PASS: x10 = 7
+TB Cycle count      = 40
+Core cycle count    = 40
+Retired instructions= 3
+Stall count         = 1
+CPI                 = 13.333333
+Final PC            = 0x0000009c
+make[1]: Leaving directory '/home/sandeep/proj1_rv32i'
+
+===== RV32I PIPE5 regression completed =====

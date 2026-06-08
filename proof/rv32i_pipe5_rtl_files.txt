@@ -1,0 +1,5 @@
+rtl/alu.sv
+rtl/regfile.sv
+rtl/hazard_detection_unit.sv
+rtl/forwarding_unit.sv
+rtl/core_pipe5.sv

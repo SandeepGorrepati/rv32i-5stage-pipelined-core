@@ -81,7 +81,9 @@ module core_pipe5 #(
   reg [4:0]  idex_rd;
   reg [4:0]  idex_rs1;
   reg [4:0]  idex_rs2;
-  reg [2:0]  idex_f3;
+  /* verilator lint_off UNUSED */
+  reg [2:0]  idex_f3;  // reserved pipeline funct3 placeholder
+  /* verilator lint_on UNUSED */
   reg        idex_regwrite;
   reg        idex_is_load;
   reg        idex_is_store;
@@ -119,7 +121,9 @@ module core_pipe5 #(
   wire [31:0] dmem_rdata = dmem[exmem_alu[($clog2(DMEM_WORDS)+1):2]];
 
   // ---------------- Hazard detect ----------------
-  wire id_uses_rs2;
+  /* verilator lint_off UNUSED */
+  wire id_uses_rs2;  // exported by hazard unit for debug/extension
+  /* verilator lint_on UNUSED */
   wire load_use_hazard;
 
   hazard_detection_unit u_hazard_detection (
@@ -177,6 +181,11 @@ module core_pipe5 #(
   reg        flush_ifid;
   reg [31:0] pc_next;
 
+  // ---------------- Performance counters ----------------
+  integer cycle_count;
+  integer instr_count;
+  integer stall_count;
+
   always @(*) begin
     flush_ifid = 0;
     pc_next    = pc + 4;
@@ -231,9 +240,20 @@ module core_pipe5 #(
       idex_is_jal <= 0;
       idex_alu_imm <= 0;
       idex_alu_op <= ALU_ADD;
+
+      cycle_count <= 0;
+      instr_count <= 0;
+      stall_count <= 0;
     end
     else begin
       illegal_insn <= 0;
+
+      // Performance counters
+      cycle_count <= cycle_count + 1;
+      if (memwb_we && (memwb_rd != 0))
+        instr_count <= instr_count + 1;
+      if (load_use_hazard)
+        stall_count <= stall_count + 1;
 
       // WB stage
       wb_we <= memwb_we;
