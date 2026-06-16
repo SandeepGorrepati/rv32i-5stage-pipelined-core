@@ -26,6 +26,18 @@ The program counter increments by 4 bytes for sequential instruction execution.
 
 ---
 
+## Waveform (real simulation output)
+
+![Branch + pipeline-flush waveform](docs/waveforms/branch_pipeline.png)
+
+Captured from an actual Icarus simulation. It shows the **funct3-decoded branch
+condition** (`idex_f3` → `ex_branch_cond`), the taken branch (`ex_take_branch`)
+triggering a pipeline flush (`flush_ifid`), and `dbg_x10` settling to the correct
+final value (`7`). This is the path of the real branch bug found and fixed by the
+self-checking compliance suite — see `proof/BUG_NOTES.md`.
+
+---
+
 ## Implemented Features
 
 The processor supports a subset of the RV32I instruction set and includes:
