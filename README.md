@@ -12,6 +12,8 @@ including datapath design, hazard handling, and basic verification using directe
 
 ## Pipeline Stages
 
+![RV32I 5-stage pipeline](docs/diagrams/pipeline.png)
+
 The processor follows the standard five-stage pipeline structure.
 
 | Stage | Description |
