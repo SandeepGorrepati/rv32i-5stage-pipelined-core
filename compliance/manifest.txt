@@ -1,0 +1,15 @@
+addi 7
+add 7
+sub 7
+and 12
+or 63
+xor 51
+sll 16
+srl 16
+sra -4
+slt 1
+lui 305418240
+lw_sw 42
+beq_taken 7
+bne_nottaken 7
+jal 7

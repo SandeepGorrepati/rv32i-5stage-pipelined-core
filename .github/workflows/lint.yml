@@ -1,0 +1,25 @@
+name: RTL Lint
+
+# Verilator lint of the pipeline RTL on every push / PR -> status badge.
+# Relax the -Wno flags if a warning trips CI; the goal is to catch real errors.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verilator-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Verilator
+        run: sudo apt-get update && sudo apt-get install -y verilator && verilator --version
+      - name: Lint core_pipe5 + submodules
+        run: |
+          verilator --lint-only --top-module core_pipe5 \
+            -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM \
+            -Wno-DECLFILENAME -Wno-VARHIDDEN \
+            rtl/core_pipe5.sv rtl/alu.sv rtl/regfile.sv \
+            rtl/forwarding_unit.sv rtl/hazard_detection_unit.sv

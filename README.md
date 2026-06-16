@@ -172,6 +172,32 @@ PASS
 ![Hazard](docs/hazard_waveform.png)
 ---
 
+## Performance & Lint Proof
+
+This isn't just "it runs" — there's committed evidence in [`proof/`](proof/):
+- **Verilator lint** logs across all five RTL modules (`verilator_lint_core_pipe5.log`).
+- **Regression log** over the directed suite (`rv32i_pipe5_regression.log`).
+- **Performance counters** wired into the testbench — core cycle count, retired
+  instruction count, stall count, and **CPI** reporting (`rv32i_lint_and_perf_summary.md`).
+
+CI: every push runs a Verilator lint via GitHub Actions (see `.github/workflows/lint.yml`).
+
+## ISA Compliance — self-checking suite (✅ included)
+
+A generated, **spec-checked** instruction-level test suite lives in [`compliance/`](compliance/):
+a Python RV32I assembler + reference ISA model emits one program per instruction, each
+leaving a known result in `x10`; the expected value is computed from the **spec**, not
+the DUT. Run it:
+```bash
+bash scripts/run_compliance.sh        # -> "COMPLIANCE: 15 passed, 0 failed"
+```
+Covers ADDI/ADD/SUB/AND/OR/XOR/SLL/SRL/SRA/SLT/LUI/LW/SW/BEQ/BNE/JAL.
+
+**Next level — official riscv-tests:** running the standard `rv32ui` suite needs the
+riscv-gnu-toolchain + a minimal `ECALL`/`tohost` hook (this core is a CSR-less RV32I
+subset). Steps are in [`compliance/README.md`](compliance/README.md). The self-checking
+suite above already gives spec-checked per-instruction coverage with zero dependencies.
+
 ## Tools Used
 
 - SystemVerilog
@@ -184,3 +210,17 @@ PASS
 ## Author
 
 Sandeep Gorrepati
+
+## Pipeline diagram
+```text
+        +----+    +----+    +----+    +-----+    +----+
+  PC -> | IF | -> | ID | -> | EX | -> | MEM | -> | WB | -> regfile
+        +----+    +----+    +----+    +-----+    +----+
+                    ^          ^         |
+        load-use stall      forwarding (EX/MEM, MEM/WB -> EX)
+        (hazard unit)       branch resolved in EX -> flush IF/ID & ID/EX on taken
+```
+- **Forwarding unit:** bypasses EX/MEM and MEM/WB results back to EX to resolve RAW hazards.
+- **Hazard unit:** inserts one stall on a load-use dependency.
+- **Branch handling:** not-taken by default; on a taken branch the younger stages are flushed.
+- **Perf counters:** cycle / retired / stall / CPI (see `proof/`).
