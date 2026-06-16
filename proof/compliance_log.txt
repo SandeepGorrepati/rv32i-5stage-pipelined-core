@@ -1,0 +1,17 @@
+PASS  addi          x10=7
+PASS  add           x10=7
+PASS  sub           x10=7
+PASS  and           x10=12
+PASS  or            x10=63
+PASS  xor           x10=51
+PASS  sll           x10=16
+PASS  srl           x10=16
+PASS  sra           x10=-4
+PASS  slt           x10=1
+PASS  lw_sw         x10=42
+PASS  beq_taken     x10=7
+PASS  bne_nottaken  x10=7
+PASS  jal           x10=7
+========================================
+ COMPLIANCE: 14 passed, 0 failed   (Icarus Verilog)
+========================================

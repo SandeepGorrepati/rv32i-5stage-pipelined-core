@@ -1,5 +1,7 @@
 # RV32I 5-Stage Pipelined Processor (SystemVerilog)
 
+![RTL Lint](https://github.com/SandeepGorrepati/rv32i-5stage-pipelined-core/actions/workflows/lint.yml/badge.svg)
+
 This project implements a simple RV32I processor using a classic five-stage pipeline.
 The design was written in SystemVerilog and verified using simulation with Icarus Verilog.
 

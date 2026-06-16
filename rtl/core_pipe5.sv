@@ -170,8 +170,23 @@ module core_pipe5 #(
     .zero(ex_zero_unused)
   );
 
-  wire ex_beq         = (ex_rs1_fwd == ex_rs2_fwd);
-  wire ex_take_branch = idex_is_branch && ex_beq;
+  // Branch condition now decodes funct3 (was: BEQ-only, which mishandled BNE/BLT/...)
+  wire ex_eq  = (ex_rs1_fwd == ex_rs2_fwd);
+  wire ex_lt  = ($signed(ex_rs1_fwd) < $signed(ex_rs2_fwd));
+  wire ex_ltu = (ex_rs1_fwd < ex_rs2_fwd);
+  reg  ex_branch_cond;
+  always @(*) begin
+    case (idex_f3)
+      3'b000: ex_branch_cond = ex_eq;    // BEQ
+      3'b001: ex_branch_cond = ~ex_eq;   // BNE
+      3'b100: ex_branch_cond = ex_lt;    // BLT
+      3'b101: ex_branch_cond = ~ex_lt;   // BGE
+      3'b110: ex_branch_cond = ex_ltu;   // BLTU
+      3'b111: ex_branch_cond = ~ex_ltu;  // BGEU
+      default: ex_branch_cond = 1'b0;
+    endcase
+  end
+  wire ex_take_branch = idex_is_branch && ex_branch_cond;
 
   wire [31:0] ex_branch_tgt = idex_pc + idex_imm;
   wire [31:0] ex_jal_tgt    = idex_pc + idex_imm;

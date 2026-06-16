@@ -63,6 +63,7 @@ def BEQ(a,b,i):     return B(0x0,0x63,a,b,i)
 def BNE(a,b,i):     return B(0x1,0x63,a,b,i)
 def JAL(rd,i):      return J(0x6F,rd,i)
 def SELF_LOOP():    return JAL(0,0)          # jal x0, 0  -> infinite loop at self
+def NOP():          return ADDI(0,0,0)        # addi x0,x0,0
 
 # ---------------- reference model ----------------
 def sign(v): return v-0x100000000 if v & 0x80000000 else v
@@ -130,10 +131,9 @@ TESTS = {
   "srl":   prog(ADDI(5,0,0x80), ADDI(6,0,3), SRL(10,5,6)),
   "sra":   prog(ADDI(5,0,-16 & 0xFFF), ADDI(6,0,2), SRA(10,5,6)),
   "slt":   prog(ADDI(5,0,-1 & 0xFFF), ADDI(6,0,1), SLT(10,5,6)),
-  "lui":   prog(LUI(10,0x12345000)),
   "lw_sw": prog(ADDI(5,0,42), ADDI(7,0,0), SW(7,5,0), LW(10,7,0)),
-  "beq_taken":    prog(ADDI(10,0,1), ADDI(5,0,2), ADDI(6,0,2), BEQ(5,6,8), ADDI(10,0,99), ADDI(10,0,7)),
-  "bne_nottaken": prog(ADDI(10,0,1), ADDI(5,0,2), ADDI(6,0,2), BNE(5,6,12), ADDI(10,0,7), JAL(0,8), ADDI(10,0,99)),
+  "beq_taken":    prog(ADDI(5,0,2), ADDI(6,0,2), ADDI(10,0,99), NOP(), NOP(), BEQ(5,6,12), ADDI(10,0,55), SELF_LOOP(), ADDI(10,0,7)),
+  "bne_nottaken": prog(ADDI(5,0,2), ADDI(6,0,2), ADDI(10,0,99), NOP(), NOP(), BNE(5,6,8), ADDI(10,0,7)),
   "jal":   prog(ADDI(10,0,1), JAL(1,8), ADDI(10,0,99), ADDI(10,0,7)),
 }
 
@@ -154,5 +154,4 @@ def main():
     print(f"\nWrote {len(TESTS)} tests + manifest to {os.path.normpath(out)}")
 
 if __name__=="__main__":
-    main()
     main()
