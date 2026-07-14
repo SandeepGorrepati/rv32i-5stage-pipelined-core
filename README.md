@@ -205,9 +205,9 @@ a Python RV32I assembler + reference ISA model emits one program per instruction
 leaving a known result in `x10`; the expected value is computed from the **spec**, not
 the DUT. Run it:
 ```bash
-bash scripts/run_compliance.sh        # -> "COMPLIANCE: 15 passed, 0 failed"
+bash scripts/run_compliance.sh        # -> "COMPLIANCE: 14 passed, 0 failed"
 ```
-Covers ADDI/ADD/SUB/AND/OR/XOR/SLL/SRL/SRA/SLT/LUI/LW/SW/BEQ/BNE/JAL.
+Covers ADDI/ADD/SUB/AND/OR/XOR/SLL/SRL/SRA/SLT/LW/SW/BEQ/BNE/JAL across 14 self-checking programs.
 
 **Next level — official riscv-tests:** running the standard `rv32ui` suite needs the
 riscv-gnu-toolchain + a minimal `ECALL`/`tohost` hook (this core is a CSR-less RV32I
