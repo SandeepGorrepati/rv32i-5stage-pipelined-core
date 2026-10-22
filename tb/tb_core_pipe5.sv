@@ -57,10 +57,10 @@ module tb_core_pipe5;
     #400;
 
     if (illegal) begin
-      $display("FAIL: illegal instruction detected");
+      $fatal(1, "FAIL: illegal instruction detected");
     end
     else if (x10 !== `EXPECT_X10) begin
-      $display("FAIL: x10 = %0d, expected = %0d", x10, `EXPECT_X10);
+      $fatal(1, "FAIL: x10 = %0d, expected = %0d", x10, `EXPECT_X10);
     end
     else begin
       $display("PASS: x10 = %0d", x10);
