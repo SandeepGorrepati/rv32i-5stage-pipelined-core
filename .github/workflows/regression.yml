@@ -1,0 +1,28 @@
+name: Functional regression
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Existing pipeline regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x scripts/*.sh
+          bash scripts/run_all_pipe5.sh | tee regression.log
+      - name: Retirement and pipeline control
+        shell: bash
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -s tb_retirement -o build/retirement rtl/*.sv tb/tb_retirement.sv
+          vvp build/retirement | tee retirement.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulation-logs
+          path: '*.log'
