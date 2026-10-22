@@ -57,10 +57,14 @@ def main():
     conditions=[(0,1,1),(1,1,2),(4,-1,1),(5,1,-1),(6,1,-1),(7,-1,1)]
     for f3,a,b in conditions:
         for taken in (True,False):
-            if not taken: a,b=b,a if f3 not in (0,1) else b
             # Equality needs distinct/equal operands explicitly.
-            aa,bb=((1,1) if (taken==(f3==0)) else (1,2)) if f3 in (0,1) else (a,b)
+            aa,bb=((1,1) if (taken==(f3==0)) else (1,2)) if f3 in (0,1) else ((a,b) if taken else (b,a))
             run_case(f'branch_f3_{f3}_taken_{taken}',[addi(1,0,aa),addi(2,0,bb),branch(f3),addi(3,0,99),addi(4,0,7)])
+    for gap in range(6):
+        for source in (1,2):
+            # Leave each result live through termination so overwrites cannot hide it.
+            consumer=(1<<15 if source==1 else 1<<20)|(3<<7)|0x33
+            run_case(f'dependency_gap_{gap}_rs{source}',[addi(1,0,73)]+[0x13]*gap+[consumer])
     for seed in range(20):
         rng=random.Random(seed); program=[addi(i,0,rng.randrange(-2048,2048)) for i in range(1,16)]
         for _ in range(96):
@@ -71,6 +75,6 @@ def main():
                 ins=(f7<<25)|(r2<<20)|(r1<<15)|(f3<<12)|(rd<<7)|0x33
             program.append(ins)
         run_case(f'random_seed_{seed}',program)
-    print('PASS: 12 branch programs + 20 dependency-heavy arithmetic programs')
+    print('PASS: 12 branch + 12 dependency-distance + 20 arithmetic programs')
 
 if __name__=='__main__': main()

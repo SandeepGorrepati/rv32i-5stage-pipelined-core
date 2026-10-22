@@ -22,7 +22,10 @@ jobs:
           iverilog -g2012 -s tb_retirement -o build/retirement rtl/*.sv tb/tb_retirement.sv
           vvp build/retirement | tee retirement.log
       - name: Python instruction oracle
-        run: python3 scripts/run_oracle.py | tee oracle.log
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/run_oracle.py | tee oracle.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

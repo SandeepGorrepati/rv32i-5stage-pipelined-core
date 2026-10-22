@@ -57,18 +57,17 @@ module core_pipe5 #(
   wire [31:0] rf_rd1, rf_rd2;
 
   // ---------------- WB -> regfile ----------------
-  reg        wb_we;
-  reg [4:0]  wb_rd;
-  reg [31:0] wb_wd;
+  // MEM/WB drives the falling-edge register file directly.
+  // An extra WB register delays writes and breaks distance-three dependencies.
 
   regfile u_rf(
     .clk(clk),
     .rst(rst),
-    .we(wb_we),
+    .we(memwb_we),
     .rs1(rs1_d),
     .rs2(rs2_d),
-    .rd(wb_rd),
-    .wd(wb_wd),
+    .rd(memwb_rd),
+    .wd(memwb_wdata),
     .rd1(rf_rd1),
     .rd2(rf_rd2),
     .dbg_addr(5'd10),
@@ -229,9 +228,6 @@ module core_pipe5 #(
       ifid_pc <= 0;
       illegal_insn <= 0;
 
-      wb_we <= 0;
-      wb_rd <= 0;
-      wb_wd <= 0;
 
       memwb_wdata <= 0;
       memwb_rd <= 0;
@@ -275,10 +271,6 @@ module core_pipe5 #(
       if (load_use_hazard)
         stall_count <= stall_count + 1;
 
-      // WB stage
-      wb_we <= memwb_we;
-      wb_rd <= memwb_rd;
-      wb_wd <= memwb_wdata;
 
       // Valid bits distinguish real instructions (including NOP/x0 writes)
       // from bubbles inserted by reset, stalls and control redirects.
@@ -447,3 +439,4 @@ module core_pipe5 #(
   end
 
 endmodule
+
