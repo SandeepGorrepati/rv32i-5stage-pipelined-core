@@ -34,6 +34,8 @@ module core_pipe5 #(
   wire [31:0] instr_f = imem[pc[($clog2(IMEM_WORDS)+1):2]];
 
   // ---------------- IF/ID ----------------
+  reg ifid_valid, idex_valid, exmem_valid, memwb_valid;
+  reg [31:0] exmem_pc, memwb_pc;
   reg [31:0] ifid_pc;
   reg [31:0] ifid_instr;
 
@@ -219,6 +221,9 @@ module core_pipe5 #(
   // ---------------- Sequential pipeline update ----------------
   always @(posedge clk) begin
     if (rst) begin
+      ifid_valid <= 0; idex_valid <= 0;
+      exmem_valid <= 0; memwb_valid <= 0;
+      exmem_pc <= 0; memwb_pc <= 0;
       pc <= 0;
       ifid_instr <= NOP;
       ifid_pc <= 0;
@@ -265,7 +270,7 @@ module core_pipe5 #(
 
       // Performance counters
       cycle_count <= cycle_count + 1;
-      if (memwb_we && (memwb_rd != 0))
+      if (memwb_valid)
         instr_count <= instr_count + 1;
       if (load_use_hazard)
         stall_count <= stall_count + 1;
@@ -274,6 +279,13 @@ module core_pipe5 #(
       wb_we <= memwb_we;
       wb_rd <= memwb_rd;
       wb_wd <= memwb_wdata;
+
+      // Valid bits distinguish real instructions (including NOP/x0 writes)
+      // from bubbles inserted by reset, stalls and control redirects.
+      memwb_valid <= exmem_valid;
+      memwb_pc <= exmem_pc;
+      exmem_valid <= idex_valid;
+      exmem_pc <= idex_pc;
 
       // MEM stage
       if (exmem_is_store)
@@ -294,6 +306,7 @@ module core_pipe5 #(
 
       // ID stage -> ID/EX
       if (load_use_hazard || flush_ifid) begin
+        idex_valid     <= 0;
         idex_pc        <= 0;
         idex_rs1_val   <= 0;
         idex_rs2_val   <= 0;
@@ -311,6 +324,7 @@ module core_pipe5 #(
         idex_alu_op    <= ALU_ADD;
       end
       else begin
+        idex_valid   <= ifid_valid;
         idex_pc      <= ifid_pc;
         idex_rs1_val <= rf_rd1;
         idex_rs2_val <= rf_rd2;
@@ -413,6 +427,7 @@ module core_pipe5 #(
 
       // IF stage / IFID register
       if (flush_ifid) begin
+        ifid_valid <= 0;
         ifid_pc    <= 0;
         ifid_instr <= NOP;
         pc         <= pc_next;
@@ -423,6 +438,7 @@ module core_pipe5 #(
         ifid_instr <= ifid_instr;
       end
       else begin
+        ifid_valid <= 1;
         ifid_pc    <= pc;
         ifid_instr <= instr_f;
         pc         <= pc_next;
