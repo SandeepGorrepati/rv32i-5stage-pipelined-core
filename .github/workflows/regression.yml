@@ -1,5 +1,10 @@
 name: Functional regression
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    paths: ['rtl/**', 'tb/**', 'scripts/**', '.github/workflows/**', 'formal/**']
+  pull_request:
+    paths: ['rtl/**', 'tb/**', 'scripts/**', '.github/workflows/**', 'formal/**']
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -21,6 +26,12 @@ jobs:
           set -euo pipefail
           iverilog -g2012 -s tb_retirement -o build/retirement rtl/*.sv tb/tb_retirement.sv
           vvp build/retirement | tee retirement.log
+      - name: Unsupported instruction side-effect suppression
+        shell: bash
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -s tb_decode -o build/decode rtl/*.sv tb/tb_decode.sv
+          vvp build/decode | tee decode.log
       - name: Python instruction oracle
         shell: bash
         run: |

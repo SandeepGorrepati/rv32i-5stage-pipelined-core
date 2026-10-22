@@ -54,6 +54,18 @@ module core_pipe5 #(
   wire [31:0] imm_j_d = {{11{ifid_instr[31]}}, ifid_instr[31], ifid_instr[19:12],
                          ifid_instr[20], ifid_instr[30:21], 1'b0};
 
+  // Explicit subset legality prevents unsupported encodings from silently
+  // executing as a different instruction (e.g. LB as LW, MUL as ADD).
+  wire decode_legal =
+    ((op_d == 7'h33) && ((f7_d == 0) ||
+      ((f7_d == 7'h20) && ((f3_d == 0) || (f3_d == 5))))) ||
+    ((op_d == 7'h13) && ((f3_d == 1) ? (f7_d == 0) :
+      ((f3_d == 5) ? ((f7_d == 0) || (f7_d == 7'h20)) : 1'b1))) ||
+    ((op_d == 7'h03) && (f3_d == 2)) ||
+    ((op_d == 7'h23) && (f3_d == 2)) ||
+    ((op_d == 7'h63) && (f3_d != 2) && (f3_d != 3)) ||
+    (op_d == 7'h6f);
+
   wire [31:0] rf_rd1, rf_rd2;
 
   // ---------------- WB -> regfile ----------------
@@ -316,7 +328,7 @@ module core_pipe5 #(
         idex_alu_op    <= ALU_ADD;
       end
       else begin
-        idex_valid   <= ifid_valid;
+        idex_valid   <= ifid_valid && decode_legal;
         idex_pc      <= ifid_pc;
         idex_rs1_val <= rf_rd1;
         idex_rs2_val <= rf_rd2;
@@ -334,6 +346,7 @@ module core_pipe5 #(
         idex_alu_op    <= ALU_ADD;
         idex_imm       <= imm_i_d;
 
+        if (decode_legal) begin
         case (op_d)
           // R-type
           7'b0110011: begin
@@ -415,6 +428,7 @@ module core_pipe5 #(
             illegal_insn <= 1;
           end
         endcase
+        end else if(ifid_valid) illegal_insn <= 1;
       end
 
       // IF stage / IFID register
